@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diwali 2024 Countdown</title>
+    <style>
+        /* Previous styles remain the same */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #1a0f24, #2c1810);
+            font-family: Arial, sans-serif;
+            color: #fff;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .quotes-container {
+            margin: 20px auto;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .quote {
+            font-size: 1.2em;
+            margin: 15px 0;
+            color: #ffa500;
+            text-shadow: 0 0 5px rgba(255, 165, 0, 0.3);
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .countdown {
+            font-size: 2em;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .celebrate-btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background: linear-gradient(45deg, #ffd700, #ff4500);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .celebrate-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .diya {
+            font-size: 3em;
+            margin: 20px 0;
+            animation: flicker 1s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .message {
+            font-size: 1.5em;
+            margin: 20px 0;
+            color: #ffa500;
+            line-height: 1.6;
+        }
+
+        .credits {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #ffd700;
+            font-size: 1.2em;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            z-index: 2;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="diya">🪔</div>
+        <h1>Happy Diwali 2024</h1>
+        <div class="message">
+            Warm Diwali Wishes<br>
+            From<br>
+            <span style="color: #ffd700; font-size: 1.2em;">Rajeev Mishra</span><br>
+            To All Dear Friends
+        </div>
+
+        <div class="quotes-container">
+            <div class="quote">"May the divine light of Diwali spread into your life peace, prosperity, happiness, and good health"</div>
+            <div class="quote">"Let this Diwali burn all your bad times and enter you in good times"</div>
+            <div class="quote">"May the joy of Diwali illuminate your life and fill your days with the bright sparkles of peace, mirth & goodwill"</div>
+        </div>
+
+        <div class="countdown" id="countdown"></div>
+        <button class="celebrate-btn" onclick="celebrate()">Celebrate Diwali! 🎆</button>
+    </div>
+    <div class="credits">Created by ANUJ MISHRA</div>
+
+    <script>
+        // Sound effects - bomb blast sounds
+        const bombSounds = [
+            new Audio('data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/+1AAAAAAA0gAAAAALvjULS3/+7DEAAAAAABHAAAAIAAAQ/wAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7UgAA'),
+            new Audio('data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/+1AAAAAAA0gAAAAALvjULS3/+7DEAAAAAABHAAAAIAAAQ/wAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7UgAA')
+        ];
+
+        // Load additional intense bomb sound
+        const bombLaunchSound = new Audio('data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/+1AAAAAAA0gAAAAALvjULS3/+7DEAAAAAABHAAAAIAAAQ/wAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7UgAA');
+
+        // Countdown Timer
+        function updateCountdown() {
+            const targetDate = new Date('November 1, 2024 00:00:00').getTime();
+            const now = new Date().getTime();
+            const difference = targetDate - now;
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').innerHTML = 
+                `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Firework particle with enhanced explosion effect
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 12, // Increased spread
+                    y: Math.random() * -12
+                };
+                this.alpha = 1;
+                this.friction = 0.98;
+                this.gravity = 0.3;
+                this.size = Math.random() * 3 + 1; // Varied particle sizes
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.008;
+            }
+        }
+
+        // Canvas setup
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none';
+        document.body.appendChild(canvas);
+        
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const colors = ['#ffd700', '#ff4500', '#ff1493', '#00ff00', '#00ffff', '#ff0000', '#ffffff'];
+
+        function playBombSound() {
+            const sound = bombSounds[Math.floor(Math.random() * bombSounds.length)];
+            sound.currentTime = 0;
+            sound.volume = 1.0;
+            sound.play().catch(e => console.log('Audio playback failed:', e));
+        }
+
+        function createFirework(x, y) {
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 150; i++) { // More particles
+                particles.push(new Particle(x, y, color));
+            }
+            playBombSound();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles = particles.filter(particle => {
+                particle.update();
+                particle.draw();
+                return particle.alpha > 0;
+            });
+        }
+
+        animate();
+
+        function celebrate() {
+            // Play initial launch sound
+            bombLaunchSound.currentTime = 0;
+            bombLaunchSound.volume = 1.0;
+            bombLaunchSound.play().catch(e => console.log('Audio playback failed:', e));
+
+            let fireworkCount = 0;
+            const maxFireworks = 15; // More fireworks
+
+            const interval = setInterval(() => {
+                const x = Math.random() * canvas.width;
+                const y = canvas.height - Math.random() * canvas.height / 3;
+                createFirework(x, y);
+                fireworkCount++;
+
+                if (fireworkCount >= maxFireworks) {
+                    clearInterval(interval);
+                }
+            }, 200);
+        }
+
+        // Resize handling
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Preload sounds
+        window.addEventListener('load', () => {
+            bombSounds.forEach(sound => sound.load());
+            bombLaunchSound.load();
+        });
+    </script>
+</body>
+</html>
